@@ -1,5 +1,5 @@
-#ifndef LOGIN_H
-#define LOGIN_H
+#ifndef REGISTRATION_H
+#define REGISTRATION_H
 
 #include <iostream>
 #include <conio.h>
@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void login();
+void registration();
 bool isValidEmail(const string &email);
 
 #endif

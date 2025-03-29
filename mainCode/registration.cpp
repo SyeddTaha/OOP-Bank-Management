@@ -1,7 +1,4 @@
-#include <iostream>
-#include <conio.h>
-
-using namespace std;
+#include "registration.h"
 
 bool isValidEmail(const string &email) {
     if (email.empty()) return false;
@@ -20,7 +17,7 @@ bool isValidEmail(const string &email) {
     return true;
 }
 
-int main() {
+void registration() {
     cout << "\nRegister a new account\n";
     
     string email;

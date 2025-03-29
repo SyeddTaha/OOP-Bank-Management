@@ -3,19 +3,13 @@
 #include <conio.h>
 #include <fstream>
 #include <windows.h>
-
+#include "login.h"
+#include "registration.h"
 using namespace std;
 
-class Bank{
-    public:
-        void menu();
-        void bank_management();
-        void atm_management();
-        void login();
-        void registeration();
-};
-
 int main() {
-
+    registration();
     return 0;
 }
+
+// g++ main.cpp login.cpp registration.cpp -o program.exe
