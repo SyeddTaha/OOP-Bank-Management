@@ -3,7 +3,9 @@
 
 using namespace std;
 
-
+class Bank{
+    
+};
 
 int main() {
     
