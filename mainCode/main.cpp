@@ -8,14 +8,18 @@
 
 using namespace std;
 
+//Miscellaneous functions
 void keyEncryption(string &password);
-void toLowerCase(string &str);
-void registration(string person);
-void login(string person);
 bool isValidEmail(const string &email);
-void displayMenu();
+bool isValidPassword(const string &password);
+void toLowerCase(string &str);
 bool loadFromCSV(const string &email, const string &password, string filename);
 void saveToCSV(const string &firstName, const string &lastName, const string &email, const string &password, string filename);
+
+//User functions
+void registration(string person);
+void login(string person);
+void displayMenu();
 
 void keyEncryption(string &password) {
     password.clear();  // Clear previous password
@@ -142,6 +146,27 @@ bool isValidEmail(const string &email) {
     return true;
 }
 
+bool isValidPassword(const string &password) {
+    if (password.length() < 8) {
+        cout << "\nPassword must be at least 8 characters long.\n";
+        return false;
+    }
+
+    bool hasUpper = false, hasLower = false, hasDigit = false;
+    for (char ch : password) {
+        if (isupper(ch)) hasUpper = true;
+        if (islower(ch)) hasLower = true;
+        if (isdigit(ch)) hasDigit = true;
+    }
+
+    if (!hasUpper || !hasLower || !hasDigit) {
+        cout << "\nPassword must contain at least one uppercase letter, one lowercase letter, and one digit.\n";
+        return false;
+    }
+
+    return true;
+}
+
 void login(string person) {
     string filename;
     cout << "\n\nWelcome to NEXUS Banking System\n";
@@ -162,8 +187,8 @@ void login(string person) {
         }
     } while (!isValidEmail(email));
 
-    cout << "\nPassword: ";
     string password;
+    cout << "\nPassword: ";
     keyEncryption(password);
 
     if (loadFromCSV(email, password, filename)) {
@@ -203,8 +228,14 @@ void registration(string person) {
 
     string password, confirmPassword;
     do {
-        cout << "\nPassword: ";
-        keyEncryption(password);
+        do {
+            cout << "\nPassword: ";
+            keyEncryption(password);
+            if (!isValidPassword(password)) {
+                cout << "\nInvalid Password\nPlease enter a valid password.\n";
+            }
+        } while (!isValidPassword(password)); // Ensures password is valid before proceeding
+
         cout << "\nConfirm Password: ";
         keyEncryption(confirmPassword);
         if (password != confirmPassword) {
