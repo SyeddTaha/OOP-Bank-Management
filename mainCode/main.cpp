@@ -2,15 +2,89 @@
 #include <string>
 #include <conio.h>
 #include <fstream>
+#include <sstream> 
 #include <windows.h>
 
 using namespace std;
 
+// Function prototypes
 void registration();
 void login();
 bool isValidEmail(const string &email);
+void displayMenu();
+bool loadFromCSV(const string &email, const string &password);
+void saveToCSV(const string &firstName, const string &lastName, const string &email, const string &password);
 
-bool isValidEmail(const string &email) {
+void displayMenu(){
+    cout << "\n\nWelcome to NEXUS Banking System\n";
+    cout << "1. Login\n";
+    cout << "2. Register\n";
+    cout << "3. Admin Panel\n";
+    cout << "4. Exit\n";
+    cout << "Please select an option: ";
+    int choice;
+    cin >> choice;
+    cin.ignore();
+    switch (choice) {
+        case 1:
+            login();
+            break;
+        case 2:
+            registration();
+            break;
+        case 3:
+            cout << "\nAdmin Panel\n";
+            login();
+            break;
+        case 4:
+            cout << "\nExiting... Thank you for using NEXUS bank!\n";
+            exit(0);
+        default:
+            cout << "\nInvalid choice. Kindly retry choosing correct option.\n";
+            displayMenu();
+    }
+}
+
+void saveToCSV(const string &firstName, const string &lastName, const string &email, const string &password){
+    ofstream file("users.csv", ios::app);
+    if (file.is_open()) {
+        file << firstName << "," << lastName << "," << email << "," << password << "\n";
+        file.close();
+        // cout << "\nUser data saved successfully in users.csv!\n";
+        cout << "\n\nRegistration Successful!";
+    } else {
+        cout << "\nError: Unable to open file for saving.\n";
+    }
+}
+
+bool loadFromCSV(const string &email, const string &password) {
+    ifstream file("users.csv");
+    if (!file.is_open()) {
+        cout << "\nError: Could not open users.csv file!\n";
+        return false;
+    }
+
+    string line, firstName, lastName, storedEmail, storedPassword;
+    while (getline(file, line)) {  // Read each line from the CSV
+        stringstream ss(line);  // Use stringstream to parse CSV line
+
+        // Read values separated by commas
+        getline(ss, firstName, ',');
+        getline(ss, lastName, ',');
+        getline(ss, storedEmail, ',');
+        getline(ss, storedPassword, ',');
+
+        if (storedEmail == email && storedPassword == password) {
+            file.close();
+            return true;  // Credentials Matched
+        }
+    }
+
+    file.close();
+    return false;  // No Match Found
+}
+
+bool isValidEmail(const string &email){
     if (email.empty()) return false;
     size_t atPos = email.find('@');
     size_t dotPos = email.rfind('.');
@@ -56,11 +130,14 @@ void login(){
             cout << "*";
         }
     }
-    cout << "\n\nLogin Successful!";
+    if (loadFromCSV(email, password)) {
+        cout << "\n\nLogin Successful!\n";
+    } else {
+        cout << "\n\nInvalid Email or Password. Try Again!\n";
+    }
 }
 
-
-void registration() {
+void registration(){
     cout << "\nRegister a new account\n";
     
     string email;
@@ -117,12 +194,11 @@ void registration() {
     string lastName;
     getline(cin, lastName);
 
-    cout << "\n\nRegistration Successful!";
+    saveToCSV(firstName, lastName, email, password);
 }
 
 int main() {
-    registration();
+    // registration();
+    login();
     return 0;
 }
-
-// g++ main.cpp login.cpp registration.cpp -o program.exe
