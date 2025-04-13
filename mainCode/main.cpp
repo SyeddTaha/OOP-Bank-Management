@@ -5,8 +5,11 @@
 #include <sstream>
 #include <windows.h>
 #include <algorithm>
+#include <regex>
 
 using namespace std;
+
+//Include a strong hashing algorithm with salting also in project for secure passwords
 
 //Miscellaneous functions
 void keyEncryption(string &password);
