@@ -9,6 +9,9 @@
 
 using namespace std;
 
+
+int BankSystem :: registeredUsers = 0;
+
 //Include a strong hashing algorithm with salting also in project for secure passwords
 
 //Miscellaneous functions
@@ -23,6 +26,145 @@ void saveToCSV(const string &firstName, const string &lastName, const string &em
 void registration(string person);
 void login(string person);
 void displayMenu();
+
+class BankSystem{
+    static int registeredUsers;
+public:
+
+    void registration(string person) {
+        string filename;
+        cout << "\n\nWelcome to NEXUS Banking System\n";
+        if (person == "admin") {
+            cout << "Enter pin to access admin panel: ";
+            string pin;
+            keyEncryption(pin);
+            if (pin != "1234") {
+                cout << "\n\nInvalid pin! Access denied.\n";
+                return;
+            }
+            cout << "\n\nAccess granted!\nAdmin Registration\n";
+            filename = "admin.csv";
+        } else {
+            cout << "\n\nUser Registration\n";
+            filename = "users.csv";
+        }
+
+        cout << "\nRegister a new account\n";
+        string email;
+        do {
+            cout << "\nEmail: ";
+            getline(cin, email);
+            if (!isValidEmail(email)) {
+                cout << "\nInvalid Email\nPlease enter a valid email address.\n";
+            }
+        } while (!isValidEmail(email));
+
+        string password, confirmPassword;
+        do {
+            do {
+                cout << "\nPassword: ";
+                keyEncryption(password);
+                if (!isValidPassword(password)) {
+                    cout << "\nInvalid Password\nPlease enter a valid password.\n";
+                }
+            } while (!isValidPassword(password)); // Ensures password is valid before proceeding
+
+            cout << "\nConfirm Password: ";
+            keyEncryption(confirmPassword);
+            if (password != confirmPassword) {
+                cout << "\n\nPasswords do not match! Please try again.\n";
+            }
+        } while (password != confirmPassword);
+
+        cout << "\nFirst Name: ";
+        string firstName;
+        getline(cin, firstName);
+
+        cout << "\nLast Name: ";
+        string lastName;
+        getline(cin, lastName);
+
+        saveToCSV(firstName, lastName, email, password, filename);
+    }
+
+    void login(string person) {
+        string filename;
+        cout << "\n\nWelcome to NEXUS Banking System\n";
+        if(registeredUsers >=0 ){
+            if (person == "admin") {
+                cout << "\n\nAdmin Login\n";
+                filename = "admin.csv";
+            } else {
+                cout << "\n\nUser Login\n";
+                filename = "users.csv";
+            }
+        
+            string email;
+            do {
+                cout << "\nEmail: ";
+                getline(cin, email);
+                if (!isValidEmail(email)) {
+                    cout << "\nInvalid Email\nPlease enter a valid email address.\n";
+                }
+            } while (!isValidEmail(email));
+        
+            string password;
+            cout << "\nPassword: ";
+            keyEncryption(password);
+        
+            if (loadFromCSV(email, password, filename)) {
+                cout << "\n\nLogin Successful!\n";
+            } else {
+                cout << "\n\nInvalid Email or Password. Try Again!\n";
+            }
+        }
+        else{
+            cout << "No users available to Login. Please register first.";
+        }
+    }
+   
+    void saveToCSV(const string &firstName, const string &lastName, const string &email, const string &password, string filename) {
+        ofstream file(filename, ios::app);
+        if (file.is_open()) {
+            file << firstName << "," << lastName << "," << email << "," << password << "\n";
+            file.close();
+            cout << "\n\nRegistration Successful!";
+        } else {
+            cout << "\nError: Unable to open file for saving.\n";
+        }
+    }
+    
+    bool loadFromCSV(const string &email, const string &password, string filename) {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "\nError: Could not open " << filename << " file!\n";
+            return false;
+        }
+    
+        string line, firstName, lastName, storedEmail, storedPassword;
+        while (getline(file, line)) {
+            stringstream ss(line);
+            getline(ss, firstName, ',');
+            getline(ss, lastName, ',');
+            getline(ss, storedEmail, ',');
+            getline(ss, storedPassword, ',');
+    
+            string emailCopy = email;
+            toLowerCase(storedEmail);
+            toLowerCase(emailCopy);
+    
+            if (storedEmail == emailCopy && storedPassword == password) {
+                file.close();
+                return true;
+            }
+        }
+    
+        file.close();
+        return false;
+    }
+    
+
+};
 
 void keyEncryption(string &password) {
     password.clear();  // Clear previous password
@@ -93,45 +235,6 @@ void displayMenu() {
     }
 }
 
-void saveToCSV(const string &firstName, const string &lastName, const string &email, const string &password, string filename) {
-    ofstream file(filename, ios::app);
-    if (file.is_open()) {
-        file << firstName << "," << lastName << "," << email << "," << password << "\n";
-        file.close();
-        cout << "\n\nRegistration Successful!";
-    } else {
-        cout << "\nError: Unable to open file for saving.\n";
-    }
-}
-
-bool loadFromCSV(const string &email, const string &password, string filename) {
-    ifstream file(filename);
-    if (!file.is_open()) {
-        cout << "\nError: Could not open " << filename << " file!\n";
-        return false;
-    }
-
-    string line, firstName, lastName, storedEmail, storedPassword;
-    while (getline(file, line)) {
-        stringstream ss(line);
-        getline(ss, firstName, ',');
-        getline(ss, lastName, ',');
-        getline(ss, storedEmail, ',');
-        getline(ss, storedPassword, ',');
-
-        string emailCopy = email;
-        toLowerCase(storedEmail);
-        toLowerCase(emailCopy);
-
-        if (storedEmail == emailCopy && storedPassword == password) {
-            file.close();
-            return true;
-        }
-    }
-
-    file.close();
-    return false;
-}
 
 bool isValidEmail(const string &email) {
     if (email.empty()) return false;
@@ -168,93 +271,6 @@ bool isValidPassword(const string &password) {
     }
 
     return true;
-}
-
-void login(string person) {
-    string filename;
-    cout << "\n\nWelcome to NEXUS Banking System\n";
-    if (person == "admin") {
-        cout << "\n\nAdmin Login\n";
-        filename = "admin.csv";
-    } else {
-        cout << "\n\nUser Login\n";
-        filename = "users.csv";
-    }
-
-    string email;
-    do {
-        cout << "\nEmail: ";
-        getline(cin, email);
-        if (!isValidEmail(email)) {
-            cout << "\nInvalid Email\nPlease enter a valid email address.\n";
-        }
-    } while (!isValidEmail(email));
-
-    string password;
-    cout << "\nPassword: ";
-    keyEncryption(password);
-
-    if (loadFromCSV(email, password, filename)) {
-        cout << "\n\nLogin Successful!\n";
-    } else {
-        cout << "\n\nInvalid Email or Password. Try Again!\n";
-    }
-}
-
-void registration(string person) {
-    string filename;
-    cout << "\n\nWelcome to NEXUS Banking System\n";
-    if (person == "admin") {
-        cout << "Enter pin to access admin panel: ";
-        string pin;
-        keyEncryption(pin);
-        if (pin != "1234") {
-            cout << "\n\nInvalid pin! Access denied.\n";
-            return;
-        }
-        cout << "\n\nAccess granted!\nAdmin Registration\n";
-        filename = "admin.csv";
-    } else {
-        cout << "\n\nUser Registration\n";
-        filename = "users.csv";
-    }
-
-    cout << "\nRegister a new account\n";
-    string email;
-    do {
-        cout << "\nEmail: ";
-        getline(cin, email);
-        if (!isValidEmail(email)) {
-            cout << "\nInvalid Email\nPlease enter a valid email address.\n";
-        }
-    } while (!isValidEmail(email));
-
-    string password, confirmPassword;
-    do {
-        do {
-            cout << "\nPassword: ";
-            keyEncryption(password);
-            if (!isValidPassword(password)) {
-                cout << "\nInvalid Password\nPlease enter a valid password.\n";
-            }
-        } while (!isValidPassword(password)); // Ensures password is valid before proceeding
-
-        cout << "\nConfirm Password: ";
-        keyEncryption(confirmPassword);
-        if (password != confirmPassword) {
-            cout << "\n\nPasswords do not match! Please try again.\n";
-        }
-    } while (password != confirmPassword);
-
-    cout << "\nFirst Name: ";
-    string firstName;
-    getline(cin, firstName);
-
-    cout << "\nLast Name: ";
-    string lastName;
-    getline(cin, lastName);
-
-    saveToCSV(firstName, lastName, email, password, filename);
 }
 
 int main() {
